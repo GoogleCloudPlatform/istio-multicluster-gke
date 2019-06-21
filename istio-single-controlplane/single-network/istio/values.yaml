@@ -1,0 +1,17 @@
+prometheus:
+  enabled: true
+
+grafana:
+  enabled: true
+
+kiali:
+  enabled: true
+  createDemoSecret: true
+  dashboard:
+    grafanaURL: http://grafana:3000
+
+tracing:
+  enabled: true
+
+jaeger:
+  enabled: true 

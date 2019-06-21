@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: emailservice
 spec:
+  selector:
+    matchLabels:
+      app: emailservice
   template:
     metadata:
       labels:
@@ -25,7 +28,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/emailservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.1.1
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -44,25 +47,14 @@ spec:
             cpu: 200m
             memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
 spec:
+  selector:
+    matchLabels:
+      app: checkoutservice
   template:
     metadata:
       labels:
@@ -70,7 +62,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.1.0
+          image: gcr.io/google-samples/microservices-demo/checkoutservice:v0.1.1
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -80,6 +72,8 @@ spec:
             exec:
               command: ["/bin/grpc_health_probe", "-addr=:5050"]
           env:
+          - name: PORT
+            value: "5050"
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice:3550"
           - name: SHIPPING_SERVICE_ADDR
@@ -102,25 +96,14 @@ spec:
               cpu: 200m
               memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
 spec:
+  selector:
+    matchLabels:
+      app: frontend
   template:
     metadata:
       labels:
@@ -128,25 +111,25 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.1.0
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.1.1
           ports:
           - containerPort: 8080
-          # readinessProbe:
-          #   initialDelaySeconds: 10
-          #   httpGet:
-          #     path: "/_healthz"
-          #     port: 8080
-          #     httpHeaders:
-          #     - name: "Cookie"
-          #       value: "shop_session-id=x-readiness-probe"
-          # livenessProbe:
-          #   initialDelaySeconds: 10
-          #   httpGet:
-          #     path: "/_healthz"
-          #     port: 8080
-          #     httpHeaders:
-          #     - name: "Cookie"
-          #       value: "shop_session-id=x-liveness-probe"
+          readinessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/_healthz"
+              port: 8080
+              httpHeaders:
+              - name: "Cookie"
+                value: "shop_session-id=x-readiness-probe"
+          livenessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: "/_healthz"
+              port: 8080
+              httpHeaders:
+              - name: "Cookie"
+                value: "shop_session-id=x-liveness-probe"
           env:
           - name: PRODUCT_CATALOG_SERVICE_ADDR
             value: "productcatalogservice:3550"
@@ -172,25 +155,14 @@ spec:
               cpu: 200m
               memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: paymentservice
 spec:
+  selector:
+    matchLabels:
+      app: paymentservice
   template:
     metadata:
       labels:
@@ -199,9 +171,12 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.1.1
         ports:
         - containerPort: 50051
+        env:
+        - name: PORT
+          value: "50051"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:50051"]
@@ -216,25 +191,14 @@ spec:
             cpu: 200m
             memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: productcatalogservice
 spec:
+  selector:
+    matchLabels:
+      app: productcatalogservice
   template:
     metadata:
       labels:
@@ -243,7 +207,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.1
         ports:
         - containerPort: 3550
         readinessProbe:
@@ -263,25 +227,14 @@ spec:
             cpu: 200m
             memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: currencyservice
 spec:
+  selector:
+    matchLabels:
+      app: currencyservice
   template:
     metadata:
       labels:
@@ -290,10 +243,13 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/currencyservice:v0.1.1
         ports:
         - name: grpc
           containerPort: 7000
+        env:
+        - name: PORT
+          value: "7000"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7000"]
@@ -308,25 +264,14 @@ spec:
             cpu: 200m
             memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shippingservice
 spec:
+  selector:
+    matchLabels:
+      app: shippingservice
   template:
     metadata:
       labels:
@@ -334,7 +279,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/shippingservice:v0.1.1
         ports:
         - containerPort: 50051
         readinessProbe:
@@ -355,25 +300,14 @@ spec:
             cpu: 200m
             memory: 128Mi
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: adservice
 spec:
+  selector:
+    matchLabels:
+      app: adservice
   template:
     metadata:
       labels:
@@ -382,7 +316,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/adservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.1.1
         ports:
         - containerPort: 9555
         env:

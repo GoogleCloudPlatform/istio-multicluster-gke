@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadgenerator
 spec:
+  selector:
+    matchLabels:
+      app: loadgenerator
   replicas: 1
   template:
     metadata:
@@ -26,9 +29,20 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
+      #initContainers:
+      #- name: wait-frontend
+      #  image: alpine:3.6
+      #  command: ['sh', '-c', 'set -x;  apk add --no-cache curl && 
+      #    until timeout -t 2 curl -f "http://${FRONTEND_ADDR}"; do 
+      #      echo "waiting for http://${FRONTEND_ADDR}"; 
+      #      sleep 2;
+      #    done;']
+      #  env:
+      #  - name: FRONTEND_ADDR
+      #    value: "frontend:80"
       containers:
       - name: main
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.1.1
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -40,27 +54,16 @@ spec:
             memory: 256Mi
           limits:
             cpu: 500m
-            memory: 512Mi
+            memory: 512Mi    
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cartservice
 spec:
+  selector:
+    matchLabels:
+      app: cartservice
   template:
     metadata:
       labels:
@@ -69,12 +72,12 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.1.1
         ports:
         - containerPort: 7070
         env:
         - name: REDIS_ADDR
-          value: ""
+          value: "" # use local redis
         - name: PORT
           value: "7070"
         - name: LISTEN_ADDR
@@ -96,25 +99,14 @@ spec:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:7070"]
 ---
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: recommendationservice
 spec:
+  selector:
+    matchLabels:
+      app: recommendationservice
   template:
     metadata:
       labels:
@@ -123,7 +115,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.1.0
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.1.1
         ports:
         - containerPort: 8080
         readinessProbe:
