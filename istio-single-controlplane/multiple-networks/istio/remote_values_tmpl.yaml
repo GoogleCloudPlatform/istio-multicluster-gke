@@ -1,0 +1,61 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+galley:
+  enabled: false
+
+mixer:
+  policy:
+    enabled: false
+  telemetry:
+    enabled: false
+
+pilot:
+  enabled: false
+
+security:
+  enabled: true
+  createMeshPolicy: false
+  selfSigned: false
+
+prometheus:
+  enabled: false
+
+global:
+  istioRemote: true
+
+  enableTracing: false
+
+  # Sets an identifier for the remote network to be used for Split Horizon EDS. The network will be sent
+  # to the Pilot when connected by the sidecar and will affect the results returned in EDS requests.
+  # Based on the network identifier Pilot will return all local endpoints + endpoints of gateways to
+  # other networks.
+  #
+  # Must match the names in the meshNetworks section in the Istio local.
+  mtls:
+    enabled: true
+  controlPlaneSecurityEnabled: true
+  createRemoteSvcEndpoints: true
+  remotePilotCreateSvcEndpoint: true
+  remotePilotAddress: "$CONTROL_ISTIOINGRESS_IP"
+  remotePolicyAddress: "$CONTROL_ISTIOINGRESS_IP"
+  remoteTelemetryAddress: "$CONTROL_ISTIOINGRESS_IP"
+  network: "network2"
+
+gateways:
+  enabled: true
+  istio-ingressgateway:
+    env:
+      ISTIO_META_NETWORK: "network2"
+    loadBalancerIP: "$REMOTE_ISTIOINGRESS_IP"
