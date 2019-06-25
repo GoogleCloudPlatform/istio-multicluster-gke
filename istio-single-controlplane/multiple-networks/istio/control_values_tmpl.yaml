@@ -19,7 +19,7 @@ global:
   proxy:
     accessLogFile: "/dev/stdout"
   meshExpansion:
-    enabled: 
+    enabled: true
   network: network1
   meshNetworks:
     network1:
