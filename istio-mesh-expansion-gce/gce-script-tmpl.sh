@@ -16,11 +16,6 @@
 
 # NOTE - THIS SCRIPT SHOULD RUN ON THE GCE INSTANCE, NOT ON YOUR HOST / IN K8s
 
-# set vars
-# NOTE - THIS VARIABLE IS AUTO-POPULATED IN ./scripts/4-configure-mesh-exp.sh
-# (where GWIP refers to your GKE cluster's Istio IngressGateway IP address)
-GWIP=''
-
 # setup --  install docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
@@ -28,11 +23,11 @@ sudo apt-get update
 sudo apt-get install -y docker-ce
 
 # update /etc/hosts for DNS resolution
-echo -e "\n$GWIP istio-citadel istio-pilot istio-pilot.istio-system" | \
+echo -e "\n${GWIP} istio-citadel istio-pilot istio-pilot.istio-system" | \
    sudo tee -a /etc/hosts
 
-# install + run the istio remote - version 1.1.1
-curl -L https://storage.googleapis.com/istio-release/releases/1.1.1/deb/istio-sidecar.deb > istio-sidecar.deb
+# install + run the istio remote 
+curl -L https://storage.googleapis.com/istio-release/releases/${ISTIO_VERSION}/deb/istio-sidecar.deb > istio-sidecar.deb
 
 sudo dpkg -i istio-sidecar.deb
 
