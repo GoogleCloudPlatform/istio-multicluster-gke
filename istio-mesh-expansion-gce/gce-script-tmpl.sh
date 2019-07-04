@@ -40,6 +40,7 @@ sudo chown -R istio-proxy /etc/certs /var/lib/istio/envoy
 
 ls -l /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
 ls -l /var/lib/istio/envoy/sidecar.env
+sudo systemctl start istio-auth-node-agent
 sudo systemctl start istio
 
 
