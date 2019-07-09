@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +13,8 @@
 # limitations under the License.
 
 # NOTE - THIS SCRIPT SHOULD RUN ON THE GCE INSTANCE, NOT ON YOUR HOST / IN K8s
+
+#!/bin/bash
 
 # setup --  install docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -45,5 +45,5 @@ sudo systemctl start istio
 
 
 # run productcatalog service
-sudo docker run -d -p 3550:3550 gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.0
+sudo docker run -d -p 3550:3550 gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.1
 
