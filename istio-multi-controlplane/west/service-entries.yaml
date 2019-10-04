@@ -27,7 +27,7 @@ spec:
     protocol: GRPC
   resolution: DNS
   addresses:
-  - 127.255.0.2
+  - 240.0.0.2
   endpoints:
   - address: 35.230.12.199
     ports:
@@ -47,7 +47,7 @@ spec:
     protocol: GRPC
   resolution: DNS
   addresses:
-  - 127.255.0.3
+  - 240.0.0.3
   endpoints:
   - address: 35.230.12.199
     ports:
@@ -67,7 +67,7 @@ spec:
     protocol: GRPC
   resolution: DNS
   addresses:
-  - 127.255.0.4
+  - 240.0.0.4
   endpoints:
   - address: 35.230.12.199
     ports:
@@ -87,7 +87,7 @@ spec:
     protocol: GRPC
   resolution: DNS
   addresses:
-  - 127.255.0.8
+  - 240.0.0.8
   endpoints:
   - address: 35.230.12.199
     ports:
