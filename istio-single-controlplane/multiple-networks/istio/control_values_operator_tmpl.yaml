@@ -93,7 +93,7 @@ spec:
               port: 443
         network2:
           endpoints:
-            - fromRegistry: remote-kubeconfig
+            - fromRegistry: remote
           gateways:
             - address: "$REMOTE_ISTIOINGRESS_IP"
               port: 443
