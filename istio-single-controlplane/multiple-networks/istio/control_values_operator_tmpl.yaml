@@ -19,8 +19,8 @@ spec:
   coreDNS:
     components:
       coreDNS:
-        enabled: true
-    enabled: true
+        enabled: false
+    enabled: false
   gateways:
     components:
       egressGateway:
