@@ -84,19 +84,21 @@ spec:
       meshExpansion:
         enabled: true
       network: network1
+    pilot:
       meshNetworks:
-        network1:
-          endpoints:
-            - fromRegistry: Kubernetes
-          gateways:
-            - address: "$CONTROL_ISTIOINGRESS_IP"
-              port: 443
-        network2:
-          endpoints:
-            - fromRegistry: remote
-          gateways:
-            - address: "$REMOTE_ISTIOINGRESS_IP"
-              port: 443
+        networks:
+          network1:
+            endpoints:
+              - fromRegistry: Kubernetes
+            gateways:
+              - address: "$CONTROL_ISTIOINGRESS_IP"
+                port: 443
+          network2:
+            endpoints:
+              - fromRegistry: remote
+            gateways:
+              - address: "$REMOTE_ISTIOINGRESS_IP"
+                port: 443
     gateways:
       istio-ingressgateway:
         env:
