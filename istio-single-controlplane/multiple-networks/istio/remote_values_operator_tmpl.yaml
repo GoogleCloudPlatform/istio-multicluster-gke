@@ -1,1 +1,103 @@
-test
+apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+spec:
+  autoInjection:
+    components:
+      injector:
+        enabled: true
+    enabled: true
+  cni:
+    components:
+      cni:
+        enabled: false
+    enabled: false
+  configManagement:
+    components:
+      galley:
+        enabled: true
+    enabled: true
+  coreDNS:
+    components:
+      coreDNS:
+        enabled: false
+    enabled: false
+  gateways:
+    components:
+      egressGateway:
+        enabled: true
+        k8s:
+          env:
+          - name: ISTIO_META_REQUESTED_NETWORK_VIEW
+            value: external
+      ingressGateway:
+        enabled: true
+    enabled: true
+  policy:
+    components:
+      policy:
+        enabled: true
+    enabled: true
+  security:
+    components:
+      certManager:
+        enabled: false
+      citadel:
+        enabled: true
+      nodeAgent:
+        enabled: false
+    enabled: true
+  telemetry:
+    components:
+      telemetry:
+        enabled: true
+    enabled: true
+  trafficManagement:
+    components:
+      pilot:
+        enabled: true
+        k8s:
+          env:
+          - name: PILOT_ENABLE_FALLTHROUGH_ROUTE
+            value: "1"
+    enabled: true
+  values:
+    global:
+      mtls: 
+        enabled: true
+      controlPlaneSecurityEnabled: true
+      proxy:
+        accessLogFile: "/dev/stdout"
+      meshExpansion:
+        enabled: true
+      network: network1
+      meshNetworks:
+        network1:
+          endpoints:
+            - fromRegistry: Kubernetes
+          gateways:
+            - address: "$CONTROL_ISTIOINGRESS_IP"
+              port: 443
+        network2:
+          endpoints:
+            - fromRegistry: remote-kubeconfig
+          gateways:
+            - address: "$REMOTE_ISTIOINGRESS_IP"
+              port: 443
+    gateways:
+      istio-ingressgateway:
+        env:
+          ISTIO_META_NETWORK: "network1"
+        loadBalancerIP: "$CONTROL_ISTIOINGRESS_IP"
+    security:
+      selfSigned: false
+    prometheus:
+      enabled: true
+    grafana:
+      enabled: true
+    kiali:
+      enabled: true
+      createDemoSecret: true
+      dashboard:
+        grafanaURL: http://grafana:3000
+    tracing:
+      enabled: true
