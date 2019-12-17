@@ -39,10 +39,6 @@ spec:
     components:
       egressGateway:
         enabled: false
-        k8s:
-          env:
-          - name: ISTIO_META_REQUESTED_NETWORK_VIEW
-            value: external
       ingressGateway:
         enabled: true
     enabled: true
@@ -69,20 +65,13 @@ spec:
     components:
       pilot:
         enabled: false
-        k8s:
-          env:
-          - name: PILOT_ENABLE_FALLTHROUGH_ROUTE
-            value: "1"
     enabled: false
   values:
     security:
-      createMeshPolicy: false
       selfSigned: false
     prometheus:
       enabled: false
     global:
-      istioRemote: true
-      enableTracing: false
       # Sets an identifier for the remote network to be used for Split Horizon EDS. The network will be sent
       # to the Pilot when connected by the sidecar and will affect the results returned in EDS requests.
       # Based on the network identifier Pilot will return all local endpoints + endpoints of gateways to
