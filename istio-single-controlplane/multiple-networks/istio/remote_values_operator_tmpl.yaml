@@ -28,8 +28,8 @@ spec:
   configManagement:
     components:
       galley:
-        enabled: true
-    enabled: true
+        enabled: false
+    enabled: false
   coreDNS:
     components:
       coreDNS:
@@ -49,8 +49,8 @@ spec:
   policy:
     components:
       policy:
-        enabled: true
-    enabled: true
+        enabled: false
+    enabled: false
   security:
     components:
       certManager:
@@ -63,55 +63,16 @@ spec:
   telemetry:
     components:
       telemetry:
-        enabled: true
-    enabled: true
+        enabled: false
+    enabled: false
   trafficManagement:
     components:
       pilot:
-        enabled: true
+        enabled: false
         k8s:
           env:
           - name: PILOT_ENABLE_FALLTHROUGH_ROUTE
             value: "1"
-    enabled: true
+    enabled: false
   values:
-    global:
-      mtls: 
-        enabled: true
-      controlPlaneSecurityEnabled: true
-      proxy:
-        accessLogFile: "/dev/stdout"
-      meshExpansion:
-        enabled: true
-      network: network1
-      meshNetworks:
-        network1:
-          endpoints:
-            - fromRegistry: Kubernetes
-          gateways:
-            - address: "$CONTROL_ISTIOINGRESS_IP"
-              port: 443
-        network2:
-          endpoints:
-            - fromRegistry: remote-kubeconfig
-          gateways:
-            - address: "$REMOTE_ISTIOINGRESS_IP"
-              port: 443
-    gateways:
-      istio-ingressgateway:
-        env:
-          ISTIO_META_NETWORK: "network1"
-        loadBalancerIP: "$CONTROL_ISTIOINGRESS_IP"
-    security:
-      selfSigned: false
-    prometheus:
-      enabled: true
-    grafana:
-      enabled: true
-    kiali:
-      enabled: true
-      createDemoSecret: true
-      dashboard:
-        grafanaURL: http://grafana:3000
-    tracing:
-      enabled: true
+    
