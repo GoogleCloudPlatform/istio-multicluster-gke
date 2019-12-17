@@ -62,26 +62,42 @@ spec:
     enabled: true
   values:
     global:
+      mtls: 
+        enabled: true
       controlPlaneSecurityEnabled: true
+      proxy:
+        accessLogFile: "/dev/stdout"
       meshExpansion:
         enabled: true
-      multiCluster:
-        enabled: true
-      podDNSSearchNamespaces:
-      - global
-      - '{{ valueOrDefault .DeploymentMeta.Namespace "default" }}.global'
+      network: network1
+      meshNetworks:
+        network1:
+          endpoints:
+            - fromRegistry: Kubernetes
+          gateways:
+            - address: "$CONTROL_ISTIOINGRESS_IP"
+              port: 443
+        network2:
+          endpoints:
+            - fromRegistry: remote-kubeconfig
+          gateways:
+            - address: "$REMOTE_ISTIOINGRESS_IP"
+              port: 443
+    gateways:
+      istio-ingressgateway:
+        env:
+          ISTIO_META_NETWORK: "network1"
+        loadBalancerIP: "$CONTROL_ISTIOINGRESS_IP"
+    security:
+      selfSigned: false
+    prometheus:
+      enabled: true
     grafana:
       enabled: true
     kiali:
+      enabled: true
       createDemoSecret: true
       dashboard:
         grafanaURL: http://grafana:3000
-      enabled: true
-    prometheus:
-      enabled: true
-    security:
-      selfSigned: false
-    sidecarInjectorWebhook:
-      rewriteAppHTTPProbe: true
     tracing:
       enabled: true
