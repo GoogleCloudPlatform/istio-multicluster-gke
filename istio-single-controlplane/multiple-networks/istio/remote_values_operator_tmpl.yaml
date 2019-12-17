@@ -38,7 +38,7 @@ spec:
   gateways:
     components:
       egressGateway:
-        enabled: true
+        enabled: false
         k8s:
           env:
           - name: ISTIO_META_REQUESTED_NETWORK_VIEW
