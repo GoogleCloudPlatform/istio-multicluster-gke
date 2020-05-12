@@ -306,6 +306,7 @@ spec:
           name: ingressgateway-ca-certs
           secretName: istio-ingressgateway-ca-certs
         type: LoadBalancer
+        loadBalancerIP: "$REMOTE_ISTIOINGRESS_IP"
         zvpn:
           enabled: true
           suffix: global
