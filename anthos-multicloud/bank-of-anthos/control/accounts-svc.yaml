@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts-db
+  labels:
+    app: accounts-db
+    tier: db
+spec:
+  ports:
+    - port: 5432
+      name: postgredb
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    app: accounts-db
+    tier: db
