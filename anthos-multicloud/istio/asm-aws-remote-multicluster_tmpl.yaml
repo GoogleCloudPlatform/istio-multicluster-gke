@@ -79,7 +79,7 @@ spec:
                     release: istio
                   annotations:
                     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-                    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+                    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
           hpaSpec:
             maxReplicas: 5
             metrics:
@@ -323,7 +323,7 @@ spec:
           name: ingressgateway-ca-certs
           secretName: istio-ingressgateway-ca-certs
         type: LoadBalancer
-        loadBalancerIP: "$AWS_ISTIOINGRESS_IP"
+        # loadBalancerIP: "$AWS_ISTIOINGRESS_IP"
         zvpn:
           enabled: true
           suffix: global
