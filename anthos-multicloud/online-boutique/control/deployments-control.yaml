@@ -100,6 +100,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  labels:
+    provider: gcp
 spec:
   selector:
     matchLabels:
@@ -129,6 +131,8 @@ spec:
             value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
             value: "adservice:9555"
+          - name: ENV_PLATFORM
+            value: "gcp"  
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
           resources:
