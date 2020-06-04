@@ -204,17 +204,17 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
-      initContainers:
-      - name: wait-frontend
-        image: alpine:3.6
-        command: ['sh', '-c', 'set -x;  apk add --no-cache curl && 
-          until timeout -t 2 curl -f "http://frontend"; do 
-            echo "waiting for http://frontend"; 
-            sleep 2;
-          done;']
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
+      # initContainers:
+      # - name: wait-frontend
+      #   image: alpine:3.6
+      #   command: ['sh', '-c', 'set -x;  apk add --no-cache curl && 
+      #     until timeout -t 2 curl -f "http://frontend"; do 
+      #       echo "waiting for http://frontend"; 
+      #       sleep 2;
+      #     done;']
+      #   env:
+      #   - name: FRONTEND_ADDR
+      #     value: "frontend:80"
       containers:
       - name: main
         image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.2.0
