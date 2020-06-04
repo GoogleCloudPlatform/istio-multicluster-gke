@@ -27,7 +27,7 @@ spec:
   addresses:
   - 240.0.0.5
   endpoints:
-  - address: $CONTROL2_GW_IP
+  - address: CONTROL2_GW_IP
     ports:
       http1: 15443
 ---
@@ -47,7 +47,7 @@ spec:
   addresses:
   - 240.0.0.6
   endpoints:
-  - address: $CONTROL2_GW_IP
+  - address: CONTROL2_GW_IP
     ports:
       grpc: 15443
 ---
@@ -67,6 +67,6 @@ spec:
   addresses:
   - 240.0.0.7
   endpoints:
-  - address: $CONTROL2_GW_IP
+  - address: CONTROL2_GW_IP
     ports:
       grpc: 15443
