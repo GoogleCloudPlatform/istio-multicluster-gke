@@ -19,4 +19,4 @@ metadata:
   namespace: kube-system
 data:
   stubDomains: |
-    {"global": ["$(kubectl get svc -n istio-system istiocoredns -o jsonpath={.spec.clusterIP})"]}
+    {"global": ["istiocoredns.istio-system.svc.cluster.local"]}
