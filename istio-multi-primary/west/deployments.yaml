@@ -24,10 +24,13 @@ spec:
     metadata:
       labels:
         app: frontend
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      serviceAccountName: default
       containers:
         - name: server
-          image: gcr.io/google-samples/microservices-demo/frontend:v0.1.1
+          image: gcr.io/google-samples/microservices-demo/frontend:v0.2.2
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -47,20 +50,28 @@ spec:
               - name: "Cookie"
                 value: "shop_session-id=x-liveness-probe"
           env:
+          - name: PORT
+            value: "8080"
           - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "productcatalogservice.hipster2.svc.cluster.local:3550"
+            value: "productcatalogservice:3550"
           - name: CURRENCY_SERVICE_ADDR
-            value: "currencyservice.hipster1.global:7000"
+            value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
-            value: "cartservice.hipster2.svc.cluster.local:7070"
+            value: "cartservice:7070"
           - name: RECOMMENDATION_SERVICE_ADDR
-            value: "recommendationservice.hipster2.svc.cluster.local:8080"
+            value: "recommendationservice:8080"
           - name: SHIPPING_SERVICE_ADDR
-            value: "shippingservice.hipster1.global:50051"
+            value: "shippingservice:50051"
           - name: CHECKOUT_SERVICE_ADDR
-            value: "checkoutservice.hipster1.global:5050"
+            value: "checkoutservice:5050"
           - name: AD_SERVICE_ADDR
-            value: "adservice.hipster1.global:9555"
+            value: "adservice:9555"
+          - name: ENV_PLATFORM
+            value: "gcp"
+          # - name: DISABLE_TRACING
+          #   value: "1"
+          # - name: DISABLE_PROFILER
+          #   value: "1"
           # - name: JAEGER_SERVICE_ADDR
           #   value: "jaeger-collector:14268"
           resources:
@@ -70,6 +81,53 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendationservice
+spec:
+  selector:
+    matchLabels:
+      app: recommendationservice
+  template:
+    metadata:
+      labels:
+        app: recommendationservice
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.2.2
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        livenessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        env:
+        - name: PORT
+          value: "8080"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+        # - name: DISABLE_TRACING
+        #   value: "1"
+        # - name: DISABLE_PROFILER
+        #   value: "1"
+        # - name: DISABLE_DEBUGGER
+        #   value: "1"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 220Mi
+          limits:
+            cpu: 200m
+            memory: 450Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -84,21 +142,30 @@ spec:
       labels:
         app: productcatalogservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.1
+        image: gcr.io/google-samples/microservices-demo/productcatalogservice:v0.2.2
         ports:
         - containerPort: 3550
+        env:
+        - name: PORT
+          value: "3550"
+        # - name: DISABLE_STATS
+        #   value: "1"
+        # - name: DISABLE_TRACING
+        #   value: "1"
+        # - name: DISABLE_PROFILER
+        #   value: "1"
+        # - name: JAEGER_SERVICE_ADDR
+        #   value: "jaeger-collector:14268"
         readinessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
         livenessProbe:
           exec:
             command: ["/bin/grpc_health_probe", "-addr=:3550"]
-#        env:
-#          - name: JAEGER_SERVICE_ADDR
-#            value: "jaeger-collector:14268"
         resources:
           requests:
             cpu: 100m
@@ -120,19 +187,16 @@ spec:
       labels:
         app: cartservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.1.1
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.2.2
         ports:
         - containerPort: 7070
         env:
         - name: REDIS_ADDR
-          value: "" # use local redis
-        - name: PORT
-          value: "7070"
-        - name: LISTEN_ADDR
-          value: "0.0.0.0"
+          value: "redis-cart:6379"
         resources:
           requests:
             cpu: 200m
@@ -143,50 +207,12 @@ spec:
         readinessProbe:
           initialDelaySeconds: 15
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
         livenessProbe:
           initialDelaySeconds: 15
           periodSeconds: 10
           exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: recommendationservice
-spec:
-  selector:
-    matchLabels:
-      app: recommendationservice
-  template:
-    metadata:
-      labels:
-        app: recommendationservice
-    spec:
-      terminationGracePeriodSeconds: 5
-      containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.1.1
-        ports:
-        - containerPort: 8080
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        env:
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice.hipster2.svc.cluster.local:3550"
-        resources:
-          requests:
-            cpu: 100m
-            memory: 220Mi
-          limits:
-            cpu: 200m
-            memory: 450Mi
+            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -201,23 +227,15 @@ spec:
     metadata:
       labels:
         app: loadgenerator
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
-      initContainers:
-      - name: wait-frontend
-        image: alpine:3.6
-        command: ['sh', '-c', 'set -x;  apk add --no-cache curl && 
-          until timeout -t 2 curl -f "http://${FRONTEND_ADDR}"; do 
-            echo "waiting for http://${FRONTEND_ADDR}"; 
-            sleep 2;
-          done;']
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
       containers:
       - name: main
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.1.1
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.2.2
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -229,4 +247,45 @@ spec:
             memory: 256Mi
           limits:
             cpu: 500m
-            memory: 512Mi      
+            memory: 512Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cart
+spec:
+  selector:
+    matchLabels:
+      app: redis-cart
+  template:
+    metadata:
+      labels:
+        app: redis-cart
+    spec:
+      containers:
+      - name: redis
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 70m
+            memory: 200Mi
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+---
