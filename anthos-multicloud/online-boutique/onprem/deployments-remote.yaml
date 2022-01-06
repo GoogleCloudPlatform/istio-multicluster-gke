@@ -42,7 +42,7 @@ spec:
       #    value: "frontend:80"
       containers:
       - name: main
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.2.0
+        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.3.4
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -72,7 +72,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.2.0
+        image: gcr.io/google-samples/microservices-demo/cartservice:v0.3.4
         ports:
         - containerPort: 7070
         env:
@@ -115,7 +115,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.2.0
+        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.3.4
         ports:
         - containerPort: 8080
         readinessProbe:
