@@ -27,10 +27,10 @@ spec:
       labels:
         app: ledger-db
     spec:
+      serviceAccountName: default
       containers:
         - name: postgres
-          image: gcr.io/bank-of-anthos/ledger-db:v0.5.2
-          imagePullPolicy: "IfNotPresent"
+          image: gcr.io/bank-of-anthos-ci/ledger-db:v0.5.2
           ports:
             - containerPort: 5432
           envFrom:
@@ -39,7 +39,14 @@ spec:
             - configMapRef:
                 name: ledger-db-config
             - configMapRef:
-                name: default-data-config
+                name: demo-data-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           volumeMounts:
             - name: postgresdb
               mountPath: /var/lib/postgresql/data

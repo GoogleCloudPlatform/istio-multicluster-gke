@@ -45,5 +45,5 @@ sudo systemctl start istio
 
 
 # run productcatalog service
-sudo docker run -d -p 3550:3550 gcr.io/google-samples/microservices-demo/productcatalogservice:v0.1.2
+sudo docker run -d -p 3550:3550 gcr.io/google-samples/microservices-demo/productcatalogservice:v0.3.4
 

@@ -25,10 +25,11 @@ spec:
       labels:
         app: balancereader
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: reader
-        image: gcr.io/bank-of-anthos/balancereader:v0.5.2
+      - name: balancereader
+        image: gcr.io/bank-of-anthos-ci/balancereader:v0.5.2
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
@@ -38,6 +39,11 @@ spec:
           value: "v0.5.2"
         - name: PORT
           value: "8080"
+        # toggle Cloud Trace export
+        - name: ENABLE_TRACING
+          value: "true"
+        - name: ENABLE_METRICS
+          value: "true"
         - name: POLL_MS
           value: "100"
         - name: CACHE_SIZE
@@ -45,6 +51,14 @@ spec:
         # tell Java to obey container memory limits
         - name: JVM_OPTS
           value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+        # Valid levels are debug, info, warn, error, fatal.
+        # If no valid level is set, will default to info.
+        - name: LOG_LEVEL
+          value: "info"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         envFrom:
         - configMapRef:
             name: environment-config
@@ -53,22 +67,25 @@ spec:
             name: ledger-db-config
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
+            cpu: 100m
+            memory: 512Mi
           limits:
-            cpu: 300m
+            cpu: 500m
+            memory: 1Gi
         readinessProbe:
           httpGet:
             path: /ready
             port: 8080
-          initialDelaySeconds: 5
+          initialDelaySeconds: 60
           periodSeconds: 5
+          timeoutSeconds: 10
         livenessProbe:
           httpGet:
             path: /healthy
             port: 8080
           initialDelaySeconds: 120
           periodSeconds: 5
+          timeoutSeconds: 10
       volumes:
       - name: publickey
         secret:

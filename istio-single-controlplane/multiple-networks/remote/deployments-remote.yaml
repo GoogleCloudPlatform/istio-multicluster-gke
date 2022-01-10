@@ -1,5 +1,4 @@
----
-# Copyright 2018 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,49 +15,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loadgenerator
-spec:
-  selector:
-    matchLabels:
-      app: loadgenerator
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: loadgenerator
-    spec:
-      terminationGracePeriodSeconds: 5
-      restartPolicy: Always
-      #initContainers:
-      #- name: wait-frontend
-      #  image: alpine:3.6
-      #  command: ['sh', '-c', 'set -x;  apk add --no-cache curl && 
-      #    until timeout -t 2 curl -f "http://${FRONTEND_ADDR}"; do 
-      #      echo "waiting for http://${FRONTEND_ADDR}"; 
-      #      sleep 2;
-      #    done;']
-      #  env:
-      #  - name: FRONTEND_ADDR
-      #    value: "frontend:80"
-      containers:
-      - name: main
-        image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.3.4
-        env:
-        - name: FRONTEND_ADDR
-          value: "frontend:80"
-        - name: USERS
-          value: "10"
-        resources:
-          requests:
-            cpu: 300m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi    
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: cartservice
 spec:
   selector:
@@ -69,35 +25,34 @@ spec:
       labels:
         app: cartservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/cartservice:v0.3.4
-        ports:
-        - containerPort: 7070
-        env:
-        - name: REDIS_ADDR
-          value: "" # use local redis
-        - name: PORT
-          value: "7070"
-        - name: LISTEN_ADDR
-          value: "0.0.0.0"
-        resources:
-          requests:
-            cpu: 200m
-            memory: 64Mi
-          limits:
-            cpu: 300m
-            memory: 128Mi
-        readinessProbe:
-          initialDelaySeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
-        livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070"]
+        - name: server
+          image: gcr.io/google-samples/microservices-demo/cartservice:v0.3.4
+          ports:
+            - containerPort: 7070
+          env:
+            - name: REDIS_ADDR
+              value: "redis-cart:6379"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 128Mi
+          readinessProbe:
+            initialDelaySeconds: 15
+            exec:
+              command:
+                ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+          livenessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            exec:
+              command:
+                ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -112,27 +67,87 @@ spec:
       labels:
         app: recommendationservice
     spec:
+      serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: server
-        image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.3.4
-        ports:
-        - containerPort: 8080
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
-        env:
-        - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalogservice:3550"
-        resources:
-          requests:
-            cpu: 100m
-            memory: 220Mi
-          limits:
-            cpu: 200m
-            memory: 450Mi
+        - name: server
+          image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.3.4
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            periodSeconds: 5
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          livenessProbe:
+            periodSeconds: 5
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          env:
+            - name: PORT
+              value: "8080"
+            - name: PRODUCT_CATALOG_SERVICE_ADDR
+              value: "productcatalogservice:3550"
+          # - name: DISABLE_TRACING
+          #   value: "1"
+          # - name: DISABLE_PROFILER
+          #   value: "1"
+          # - name: DISABLE_DEBUGGER
+          #   value: "1"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 220Mi
+            limits:
+              cpu: 200m
+              memory: 450Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgenerator
+spec:
+  selector:
+    matchLabels:
+      app: loadgenerator
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: loadgenerator
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      restartPolicy: Always
+      initContainers:
+        - command:
+            - /bin/sh
+            - -exc
+            - |
+              echo "Init container pinging frontend: ${FRONTEND_ADDR}..."
+              STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
+              if test $STATUSCODE -ne 200; then
+                  echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
+                  exit 1
+              fi
+          name: frontend-check
+          image: busybox:latest
+          env:
+            - name: FRONTEND_ADDR
+              value: "frontend:80"
+      containers:
+        - name: main
+          image: gcr.io/google-samples/microservices-demo/loadgenerator:v0.3.4
+          env:
+            - name: FRONTEND_ADDR
+              value: "frontend:80"
+            - name: USERS
+              value: "10"
+          resources:
+            requests:
+              cpu: 300m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
